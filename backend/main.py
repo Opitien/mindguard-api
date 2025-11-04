@@ -1,12 +1,9 @@
-# backend/main.py
-
 import sys, os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-import os
 import requests
 import joblib
 
@@ -22,20 +19,40 @@ VECTORIZER_URL = "https://drive.google.com/uc?export=download&id=1ffHyi06h7Kgpwv
 os.makedirs("backend", exist_ok=True)
 
 
-# -------------------- Helper: Download files if missing --------------------
-def download_file(url: str, dest: str):
-    if not os.path.exists(dest):
-        print(f"Downloading {os.path.basename(dest)}...")
-        response = requests.get(url)
-        response.raise_for_status()
-        with open(dest, "wb") as f:
-            f.write(response.content)
-        print(f"{os.path.basename(dest)} downloaded successfully.")
+# -------------------- Helper: Download files from Google Drive safely --------------------
+def download_file_from_google_drive(url: str, destination: str):
+    """Stream-download large files from Google Drive safely."""
+    if os.path.exists(destination):
+        return  # Skip if already downloaded
+
+    print(f"Downloading {os.path.basename(destination)} from Google Drive...")
+    session = requests.Session()
+    response = session.get(url, stream=True)
+    token = None
+
+    # Handle confirmation token (for large files)
+    for key, value in response.cookies.items():
+        if key.startswith("download_warning"):
+            token = value
+            break
+
+    if token:
+        params = {"confirm": token}
+        response = session.get(url, params=params, stream=True)
+
+    CHUNK_SIZE = 32768
+    with open(destination, "wb") as f:
+        for chunk in response.iter_content(CHUNK_SIZE):
+            if chunk:
+                f.write(chunk)
+
+    print(f"{os.path.basename(destination)} downloaded successfully.")
 
 
-# Download model and vectorizer if not found
-download_file(MODEL_URL, MODEL_PATH)
-download_file(VECTORIZER_URL, VECTORIZER_PATH)
+# -------------------- Download model/vectorizer if missing --------------------
+download_file_from_google_drive(MODEL_URL, MODEL_PATH)
+download_file_from_google_drive(VECTORIZER_URL, VECTORIZER_PATH)
+
 
 # -------------------- Load Model and Vectorizer --------------------
 model = joblib.load(MODEL_PATH)
@@ -45,10 +62,9 @@ vectorizer = joblib.load(VECTORIZER_PATH)
 # -------------------- FastAPI Setup --------------------
 app = FastAPI(title="MindGuard Depression Detection API", version="1.0")
 
-# Enable CORS for frontend communication (Next.js)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # You can restrict to ["http://localhost:3000"] if you want
+    allow_origins=["*"],  # Change to specific frontend domain if needed
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
