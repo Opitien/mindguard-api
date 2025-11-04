@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: mindguard-api
+    env: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port 10000
+    plan: free
+git add .
+git commit -m "Add render deployment config"
+git push origin main
