@@ -1,4 +1,4 @@
-// File: C:\Users\themadafghan\Downloads\mindguard-api\app\layout.tsx
+// File: C:\Users\themadafghan\mindguard-api\app\layout.tsx
 import * as entry from '../../../app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
