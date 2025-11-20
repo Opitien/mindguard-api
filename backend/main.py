@@ -64,7 +64,7 @@ app = FastAPI(title="MindGuard Depression Detection API", version="1.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Change to specific frontend domain if needed
+    allow_origins=["*"],  # you can replace "*" with your frontend domain later
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -74,6 +74,17 @@ app.add_middleware(
 # -------------------- Input Schema --------------------
 class TextInput(BaseModel):
     text: str
+
+
+# -------------------- Helper: same logic as your original script --------------------
+def predict_depression_message(text: str) -> str:
+    """Return a human-readable message based on the model prediction."""
+    text_vector = vectorizer.transform([text])
+    prediction = model.predict(text_vector)[0]
+    if prediction == 1:
+        return "⚠️ Signs of depression detected."
+    else:
+        return "✅ No signs of depression detected."
 
 
 # -------------------- Root Endpoint --------------------
@@ -89,9 +100,12 @@ def predict(input_data: TextInput):
     prediction = model.predict(vect_text)[0]
     proba = model.predict_proba(vect_text)[0][1]
 
+    message = predict_depression_message(input_data.text)
+
     return {
         "input": input_data.text,
         "prediction": int(prediction),
         "probability": float(proba),
-        "label": "Depressed" if prediction == 1 else "Not Depressed"
+        "label": "Depressed" if prediction == 1 else "Not Depressed",
+        "message": message,  # 👈 your original script's output
     }

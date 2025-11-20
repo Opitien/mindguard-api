@@ -18,10 +18,10 @@ export function ChatContainer() {
   const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE])
   const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const [optimisticMessages, addOptimisticMessage] = useOptimistic(messages, (state, newMessage: Message) => [
-    ...state,
-    newMessage,
-  ])
+  const [optimisticMessages, addOptimisticMessage] = useOptimistic(
+    messages,
+    (state, newMessage: Message) => [...state, newMessage]
+  )
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -41,8 +41,8 @@ export function ChatContainer() {
     setIsTyping(true)
 
     try {
-      // 🔥 Send text to your FastAPI backend
-      const res = await fetch("http://127.0.0.1:8000/predict", {
+      // Call your Next.js API route
+      const res = await fetch("/api/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: content }),
@@ -50,14 +50,10 @@ export function ChatContainer() {
 
       const data = await res.json()
 
-      // Format bot reply nicely
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content:
-          data?.label === "Depressed"
-            ? `😔 Based on your message, you might be feeling **depressed**.\nConfidence: ${(data.probability * 100).toFixed(1)}%. Remember, you're not alone — reaching out for help is a strong step.`
-            : `😊 You seem **not depressed** based on your message.\nConfidence: ${(data.probability * 100).toFixed(1)}%. Keep taking care of your mental health!`,
+        content: `${data.message} (Confidence: ${(data.probability * 100).toFixed(1)}%)`,
         timestamp: new Date(),
       }
 
@@ -67,7 +63,8 @@ export function ChatContainer() {
       const errorMessage: Message = {
         id: (Date.now() + 2).toString(),
         role: "assistant",
-        content: "⚠️ I couldn’t reach the backend right now. Please make sure your FastAPI server is running.",
+        content:
+          "⚠️ I couldn’t reach the backend right now. Please make sure the server is running.",
         timestamp: new Date(),
       }
       setMessages((prev) => [...prev, errorMessage])
@@ -87,8 +84,12 @@ export function ChatContainer() {
             </div>
           </Avatar>
           <div>
-            <h1 className="text-sm font-semibold text-foreground">Emotional Wellness Assistant</h1>
-            <p className="text-xs text-muted-foreground">Here to listen and support you</p>
+            <h1 className="text-sm font-semibold text-foreground">
+              Emotional Wellness Assistant
+            </h1>
+            <p className="text-xs text-muted-foreground">
+              Here to listen and support you
+            </p>
           </div>
         </div>
       </header>

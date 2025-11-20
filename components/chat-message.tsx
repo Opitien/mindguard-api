@@ -10,37 +10,46 @@ interface ChatMessageProps {
   typingText?: string
 }
 
-export function ChatMessage({ message, isTyping = false, typingText = "Typing" }: ChatMessageProps) {
+export function ChatMessage({
+  message,
+  isTyping = false,
+  typingText = "Typing",
+}: ChatMessageProps) {
   const [isVisible, setIsVisible] = useState(false)
   const isUser = message.role === "user"
 
   useEffect(() => {
-    // Trigger animation on mount
     const timer = setTimeout(() => setIsVisible(true), 10)
     return () => clearTimeout(timer)
   }, [])
 
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString("en-US", {
+  const formatTime = (date: Date) =>
+    date.toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
     })
-  }
 
   return (
     <div
       className={cn(
         "flex w-full gap-3 transition-all duration-500 ease-out",
         isUser ? "justify-end" : "justify-start",
-        isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0",
+        isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
       )}
     >
-      <div className={cn("flex max-w-[80%] flex-col gap-1 md:max-w-[70%]", isUser ? "items-end" : "items-start")}>
+      <div
+        className={cn(
+          "flex max-w-[80%] flex-col gap-1 md:max-w-[70%]",
+          isUser ? "items-end" : "items-start"
+        )}
+      >
         <div
           className={cn(
             "rounded-2xl px-4 py-3 shadow-sm",
-            isUser ? "bg-user-message text-user-message-foreground" : "bg-bot-message text-bot-message-foreground",
+            isUser
+              ? "bg-user-message text-user-message-foreground"
+              : "bg-bot-message text-bot-message-foreground"
           )}
         >
           {isTyping ? (
@@ -53,10 +62,16 @@ export function ChatMessage({ message, isTyping = false, typingText = "Typing" }
               <span className="text-xs text-muted-foreground">{typingText}</span>
             </div>
           ) : (
-            <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">{message.content}</p>
+            <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">
+              {message.content}
+            </p>
           )}
         </div>
-        {!isTyping && <span className="px-2 text-xs text-muted-foreground">{formatTime(message.timestamp)}</span>}
+        {!isTyping && (
+          <span className="px-2 text-xs text-muted-foreground">
+            {formatTime(message.timestamp)}
+          </span>
+        )}
       </div>
     </div>
   )

@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useRef, type KeyboardEvent } from "react"
 import { Button } from "@/components/ui/button"
 import { Send } from "lucide-react"
@@ -16,8 +15,9 @@ export function ChatInput({ onSendMessage, disabled = false }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const handleSend = () => {
-    if (message.trim() && !disabled) {
-      onSendMessage(message.trim())
+    const trimmed = message.trim()
+    if (trimmed && !disabled) {
+      onSendMessage(trimmed)
       setMessage("")
       if (textareaRef.current) {
         textareaRef.current.style.height = "auto"
@@ -34,9 +34,11 @@ export function ChatInput({ onSendMessage, disabled = false }: ChatInputProps) {
 
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMessage(e.target.value)
+
     // Auto-resize textarea
-    e.target.style.height = "auto"
-    e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`
+    const el = e.target
+    el.style.height = "auto"
+    el.style.height = `${Math.min(el.scrollHeight, 200)}px`
   }
 
   return (
