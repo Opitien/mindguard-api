@@ -14,7 +14,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -210,4 +209,7 @@ node_modules
 # Ignore large model files
 backend/depression_model.pkl
 backend/vectorizer.pkl
+
+# Next.js build output
+.next/
 

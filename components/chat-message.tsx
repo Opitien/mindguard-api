@@ -1,7 +1,7 @@
 "use client"
 
 import type { Message } from "@/types/message"
-import { cn } from "@/lib/utils"
+import { cn } from "../lib/utils"
 import { useEffect, useState } from "react"
 
 interface ChatMessageProps {
