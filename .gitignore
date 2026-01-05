@@ -213,3 +213,6 @@ backend/vectorizer.pkl
 # Next.js build output
 .next/
 
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat
